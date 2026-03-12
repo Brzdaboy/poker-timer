@@ -73,7 +73,10 @@
       });
       const [rebuys, setRebuys] = useState(0);
       const [addons, setAddons] = useState(0);
+      const [playersLeft, setPlayersLeft] = useState(20);
       const prizePool = settings.players * settings.buyIn + rebuys * settings.rebuy + addons * settings.addon;
+      const totalChips = settings.startChips * (settings.players + rebuys + addons);
+      const avgChips = playersLeft > 0 ? Math.round(totalChips / playersLeft) : 0;
 
       const current = structure[currentIdx];
       const next = structure[currentIdx + 1] || null;
@@ -178,7 +181,7 @@
               {!isBreak ? (
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <div style={{ fontSize: 11, letterSpacing: 4, color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>AKTUÁLNÍ BLINDY</div>
-                  <div style={{ fontSize: "clamp(51px, 8.5vw, 87px)", letterSpacing: 2, color: "#fff" }}>
+                  <div style={{ fontSize: "min(13vw, 19vh)", letterSpacing: 2, color: "#fff" }}>
                     <span style={{ color: "rgba(255,255,255,0.5)" }}>{fmt(current?.small)}</span>
                     <span style={{ color: "#cc1111", margin: "0 12px" }}>/</span>
                     <span>{fmt(current?.big)}</span>
@@ -190,15 +193,26 @@
                 </div>
               )}
 
+              <div style={{ display: "flex", gap: 12, marginBottom: 32, flexWrap: "wrap", justifyContent: "center" }}>
               {next && (
-                <div style={{ textAlign: "center", padding: "10px 28px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, background: "rgba(255,255,255,0.03)", marginBottom: 32 }}>
+                <div style={{ textAlign: "center", padding: "10px 28px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, background: "rgba(255,255,255,0.03)" }}>
                   <div style={{ fontSize: 10, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>{next.type === "break" ? "PŘÍŠTÍ" : "PŘÍŠTÍ LEVEL"}</div>
-                  <div style={{ fontSize: "clamp(23px, 4.5vw, 43px)", color: "rgba(255,255,255,0.6)", letterSpacing: 1 }}>
+                  <div style={{ fontSize: "min(7vw, 10vh)", color: "rgba(255,255,255,0.6)", letterSpacing: 1 }}>
                     {next.type === "break" ? `${next.label || "PAUZA"} — ${next.duration} min` : `${fmt(next.small)} / ${fmt(next.big)}`}
                   </div>
                   {next.note && <div style={{ fontSize: 10, color: "#c8a84b88", marginTop: 3 }}>{next.note}</div>}
                 </div>
               )}
+                <div style={{ textAlign: "center", padding: "10px 28px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, background: "rgba(255,255,255,0.03)" }}>
+                  <div style={{ fontSize: 10, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>AVG CHIPS</div>
+                  <div style={{ fontSize: "min(7vw, 10vh)", color: "rgba(255,255,255,0.6)", letterSpacing: 1 }}>{fmt(avgChips)}</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 6 }}>
+                    <button onClick={() => setPlayersLeft(v => Math.max(1, v - 1))} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", width: 24, height: 24, borderRadius: 3, cursor: "pointer", fontSize: 14, lineHeight: 1 }}>-</button>
+                    <span style={{ fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.4)" }}>{playersLeft} hráčů</span>
+                    <button onClick={() => setPlayersLeft(v => v + 1)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", width: 24, height: 24, borderRadius: 3, cursor: "pointer", fontSize: 14, lineHeight: 1 }}>+</button>
+                  </div>
+                </div>
+              </div>
 
               <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 32 }}>
                 <button onClick={handlePrev} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", width: 48, height: 48, borderRadius: "50%", cursor: "pointer", fontSize: 18 }}>‹</button>
@@ -230,7 +244,7 @@
               ))}
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 20, marginTop: 8 }}>
                 <h3 style={{ letterSpacing: 4, fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>ŽIVÉ POČÍTÁNÍ</h3>
-                {[["Počet rebuyů", rebuys, setRebuys],["Počet add-onů", addons, setAddons]].map(([label, val, setter]) => (
+                {[["Počet rebuyů", rebuys, setRebuys],["Počet add-onů", addons, setAddons],["Hráči ve hře", playersLeft, setPlayersLeft]].map(([label, val, setter]) => (
                   <div key={label} style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
                     <label style={{ width: 160, fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", flexShrink: 0 }}>{label}</label>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
