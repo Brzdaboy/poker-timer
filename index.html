@@ -181,7 +181,7 @@
 
               {!isBreak ? (
                 <div style={{ textAlign: "center", marginBottom: 14 }}>
-                  <div style={{ fontSize: 10, letterSpacing: 4, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>AKTUÁLNÍ BLINDY</div>
+                  <div style={{ fontSize: 15, letterSpacing: 4, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>AKTUÁLNÍ BLINDY</div>
                   <div style={{ fontSize: "min(10vw, 14vh)", letterSpacing: 2, color: "#fff" }}>
                     <span style={{ color: "rgba(255,255,255,0.5)" }}>{fmt(current?.small)}</span>
                     <span style={{ color: "#cc1111", margin: "0 12px" }}>/</span>
@@ -198,7 +198,7 @@
               <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", justifyContent: "center" }}>
                 {next && (
                   <div style={{ textAlign: "center", padding: "8px 20px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, background: "rgba(255,255,255,0.03)" }}>
-                    <div style={{ fontSize: 9, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>{next.type === "break" ? "PŘÍŠTÍ" : "PŘÍŠTÍ LEVEL"}</div>
+                    <div style={{ fontSize: 14, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>{next.type === "break" ? "PŘÍŠTÍ" : "PŘÍŠTÍ LEVEL"}</div>
                     <div style={{ fontSize: "min(5vw, 7vh)", color: "rgba(255,255,255,0.6)", letterSpacing: 1 }}>
                       {next.type === "break" ? `${next.label || "PAUZA"} — ${next.duration} min` : `${fmt(next.small)} / ${fmt(next.big)}`}
                     </div>
@@ -206,7 +206,7 @@
                   </div>
                 )}
                 <div style={{ textAlign: "center", padding: "8px 20px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, background: "rgba(255,255,255,0.03)" }}>
-                  <div style={{ fontSize: 9, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>AVG CHIPS</div>
+                  <div style={{ fontSize: 14, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>AVG CHIPS</div>
                   <div style={{ fontSize: "min(5vw, 7vh)", color: "rgba(255,255,255,0.6)", letterSpacing: 1 }}>{fmt(avgChips)}</div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 5 }}>
                     <button onClick={() => setPlayersLeft(v => Math.max(1, v - 1))} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", width: 22, height: 22, borderRadius: 3, cursor: "pointer", fontSize: 13, lineHeight: 1 }}>-</button>
@@ -215,7 +215,7 @@
                   </div>
                 </div>
                 <div style={{ padding: "8px 20px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, background: "rgba(255,255,255,0.03)" }}>
-                  <div style={{ fontSize: 9, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 6, textAlign: "center" }}>VÝHRY</div>
+                  <div style={{ fontSize: 14, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 6, textAlign: "center" }}>VÝHRY</div>
                   {PAYOUTS.map(([place, pct]) => (
                     <div key={place} style={{ display: "flex", justifyContent: "space-between", gap: 16, marginBottom: 3, alignItems: "center" }}>
                       <span style={{ fontSize: 11, color: place === "1." ? "#c8a84b" : "rgba(255,255,255,0.45)", letterSpacing: 1 }}>{place}</span>
