@@ -1,0 +1,440 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+
+const DEFAULT_STRUCTURE = [
+  { id: 1, type: "level", level: 1, small: 50, big: 100, duration: 20, block: 1, note: "" },
+  { id: 2, type: "level", level: 2, small: 75, big: 150, duration: 20, block: 1, note: "" },
+  { id: 3, type: "level", level: 3, small: 100, big: 200, duration: 20, block: 1, note: "" },
+  { id: 4, type: "break", label: "PAUZA", duration: 10, block: 1, note: "" },
+  { id: 5, type: "level", level: 4, small: 150, big: 300, duration: 20, block: 1, note: "" },
+  { id: 6, type: "level", level: 5, small: 200, big: 400, duration: 20, block: 1, note: "" },
+  { id: 7, type: "level", level: 6, small: 300, big: 600, duration: 20, block: 1, note: "KONEC REBUY" },
+  { id: 8, type: "break", label: "PAUZA – JÍDLO", duration: 20, block: 2, note: "Chip-up: odstranit 25 a 50" },
+  { id: 9, type: "level", level: 7, small: 500, big: 1000, duration: 20, block: 2, note: "" },
+  { id: 10, type: "level", level: 8, small: 800, big: 1600, duration: 20, block: 2, note: "" },
+  { id: 11, type: "level", level: 9, small: 1000, big: 2000, duration: 20, block: 2, note: "" },
+  { id: 12, type: "break", label: "PAUZA", duration: 10, block: 2, note: "" },
+  { id: 13, type: "level", level: 10, small: 1500, big: 3000, duration: 20, block: 3, note: "" },
+  { id: 14, type: "level", level: 11, small: 2000, big: 4000, duration: 20, block: 3, note: "" },
+  { id: 15, type: "level", level: 12, small: 3000, big: 6000, duration: 20, block: 3, note: "" },
+  { id: 16, type: "break", label: "PAUZA", duration: 10, block: 3, note: "Chip-up: odstranit 100 a 500" },
+  { id: 17, type: "level", level: 13, small: 4000, big: 8000, duration: 20, block: 4, note: "" },
+  { id: 18, type: "level", level: 14, small: 6000, big: 12000, duration: 20, block: 4, note: "" },
+  { id: 19, type: "level", level: 15, small: 10000, big: 20000, duration: 20, block: 4, note: "" },
+  { id: 20, type: "level", level: 16, small: 15000, big: 30000, duration: 20, block: 4, note: "" },
+  { id: 21, type: "level", level: 17, small: 20000, big: 40000, duration: 20, block: 4, note: "Předpokládaný konec" },
+];
+
+const fmt = (n) => n >= 1000 ? (n / 1000 % 1 === 0 ? n / 1000 + "k" : (n / 1000).toFixed(1) + "k") : String(n);
+const fmtTime = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+const fmtMoney = (n) => n ? n.toLocaleString("cs-CZ") + " Kč" : "—";
+
+const SUITS = ["♠", "♥", "♦", "♣"];
+
+export default function PokerTimer() {
+  const [view, setView] = useState("timer"); // timer | settings | structure
+  const [structure, setStructure] = useState(DEFAULT_STRUCTURE);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_STRUCTURE[0].duration * 60);
+  const [running, setRunning] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const intervalRef = useRef(null);
+
+  // Tournament settings
+  const [settings, setSettings] = useState({
+    players: 20,
+    startChips: 20000,
+    buyIn: 500,
+    rebuy: 500,
+    addon: 500,
+    currency: "Kč",
+    name: "Boršická Odrbávačka III.",
+  });
+
+  // Computed prize pool
+  const [rebuys, setRebuys] = useState(0);
+  const [addons, setAddons] = useState(0);
+
+  const prizePool = settings.players * settings.buyIn + rebuys * settings.rebuy + addons * settings.addon;
+
+  const current = structure[currentIdx];
+  const next = structure[currentIdx + 1] || null;
+
+  const startInterval = useCallback(() => {
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          setFlash(true);
+          setTimeout(() => setFlash(false), 3000);
+          setCurrentIdx((idx) => {
+            const next = idx + 1;
+            if (next < structure.length) {
+              setTimeout(() => setTimeLeft(structure[next].duration * 60), 0);
+              return next;
+            }
+            clearInterval(intervalRef.current);
+            setRunning(false);
+            return idx;
+          });
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+  }, [structure]);
+
+  useEffect(() => {
+    if (running) startInterval();
+    else clearInterval(intervalRef.current);
+    return () => clearInterval(intervalRef.current);
+  }, [running, startInterval]);
+
+  const handlePlayPause = () => setRunning((r) => !r);
+
+  const handleSelectLevel = (idx) => {
+    setRunning(false);
+    setCurrentIdx(idx);
+    setTimeLeft(structure[idx].duration * 60);
+  };
+
+  const handleNextLevel = () => {
+    if (currentIdx + 1 < structure.length) {
+      setRunning(false);
+      const ni = currentIdx + 1;
+      setCurrentIdx(ni);
+      setTimeLeft(structure[ni].duration * 60);
+    }
+  };
+
+  const handlePrevLevel = () => {
+    if (currentIdx > 0) {
+      setRunning(false);
+      const ni = currentIdx - 1;
+      setCurrentIdx(ni);
+      setTimeLeft(structure[ni].duration * 60);
+    }
+  };
+
+  const progress = current ? ((current.duration * 60 - timeLeft) / (current.duration * 60)) * 100 : 0;
+
+  // Structure editing
+  const updateRow = (id, field, value) => {
+    setStructure((s) => s.map((r) => r.id === id ? { ...r, [field]: field === "duration" || field === "small" || field === "big" || field === "level" || field === "block" ? Number(value) : value } : r));
+  };
+
+  const addLevel = () => {
+    const lastLevel = [...structure].reverse().find((r) => r.type === "level");
+    const newId = Math.max(...structure.map((r) => r.id)) + 1;
+    setStructure((s) => [...s, { id: newId, type: "level", level: (lastLevel?.level || 0) + 1, small: lastLevel?.small * 1.5 || 100, big: lastLevel?.big * 1.5 || 200, duration: 20, block: lastLevel?.block || 1, note: "" }]);
+  };
+
+  const addBreak = () => {
+    const newId = Math.max(...structure.map((r) => r.id)) + 1;
+    setStructure((s) => [...s, { id: newId, type: "break", label: "PAUZA", duration: 10, block: 1, note: "" }]);
+  };
+
+  const removeRow = (id) => setStructure((s) => s.filter((r) => r.id !== id));
+
+  const moveRow = (id, dir) => {
+    const idx = structure.findIndex((r) => r.id === id);
+    const newS = [...structure];
+    const target = idx + dir;
+    if (target < 0 || target >= newS.length) return;
+    [newS[idx], newS[target]] = [newS[target], newS[idx]];
+    setStructure(newS);
+  };
+
+  const isBreak = current?.type === "break";
+  const timerColor = flash ? "#ff0000" : isBreak ? "#c8a84b" : "#ffffff";
+  const pct = Math.max(0, Math.min(100, progress));
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#0a0a0a", color: "#fff",
+      fontFamily: "'Anton', sans-serif", position: "relative", overflow: "hidden"
+    }}>
+      {/* Animated grain overlay */}
+      <div style={{
+        position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
+        background: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")",
+        opacity: 0.4
+      }} />
+
+      {/* Corner suits */}
+      {[["♦", "top:16px;left:20px", "#cc1111"], ["♣", "top:16px;right:20px", "#fff"], ["♠", "bottom:16px;left:20px", "#fff"], ["♥", "bottom:16px;right:20px", "#cc1111"]].map(([s, pos, c]) => (
+        <div key={s} style={{
+          position: "fixed", ...Object.fromEntries(pos.split(";").filter(Boolean).map((p) => p.split(":"))),
+          fontSize: 28, color: c, opacity: 0.35, zIndex: 1, fontFamily: "serif", userSelect: "none"
+        }}>{s}</div>
+      ))}
+
+      {/* NAV */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        display: "flex", justifyContent: "center", gap: 8, padding: "12px 20px",
+        background: "linear-gradient(to bottom, #0a0a0a, transparent)"
+      }}>
+        {[["timer", "⏱ TIMER"], ["settings", "⚙ NASTAVENÍ"], ["structure", "📋 STRUKTURA"]].map(([v, label]) => (
+          <button key={v} onClick={() => setView(v)} style={{
+            background: view === v ? "#cc1111" : "rgba(255,255,255,0.07)",
+            color: "#fff", border: "1px solid " + (view === v ? "#cc1111" : "rgba(255,255,255,0.15)"),
+            padding: "7px 18px", borderRadius: 4, cursor: "pointer",
+            fontSize: 11, letterSpacing: 2, fontFamily: "Georgia, serif",
+            fontWeight: view === v ? "bold" : "normal",
+            transition: "all 0.2s"
+          }}>{label}</button>
+        ))}
+      </nav>
+
+      {/* ========== TIMER VIEW ========== */}
+      {view === "timer" && (
+        <div style={{
+          minHeight: "100vh", display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: 0, paddingTop: 60,
+          position: "relative", zIndex: 2
+        }}>
+          {/* Tournament name */}
+          <div style={{ fontSize: 13, letterSpacing: 4, color: "rgba(255,255,255,0.4)", marginBottom: 8, textTransform: "uppercase" }}>
+            {settings.name}
+          </div>
+
+          {/* Level badge */}
+          <div style={{
+            fontSize: 14, letterSpacing: 5, padding: "5px 19px",
+            border: "1px solid rgba(204,17,17,0.4)", borderRadius: 2, marginBottom: 24,
+            color: isBreak ? "#c8a84b" : "#cc1111", textTransform: "uppercase"
+          }}>
+            {current?.type === "break" ? (current.label || "PAUZA") : `LEVEL ${current?.level} — BLOK ${current?.block}`}
+          </div>
+
+          {/* BIG TIMER */}
+          <div style={{
+            fontSize: "clamp(105px, 20vw, 195px)", fontWeight: "400", lineHeight: 1,
+            color: timerColor, letterSpacing: "0.05em", fontFamily: "'Anton', sans-serif",
+            textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? "0 0 40px #c8a84b66" : "0 0 40px rgba(255,255,255,0.1)",
+            transition: "color 0.3s, text-shadow 0.3s",
+            position: "relative"
+          }}>
+            {fmtTime(timeLeft)}
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ width: "min(500px, 85vw)", height: 3, background: "rgba(255,255,255,0.1)", borderRadius: 2, margin: "16px 0 28px", overflow: "hidden" }}>
+            <div style={{
+              height: "100%", width: pct + "%", borderRadius: 2,
+              background: isBreak ? "linear-gradient(90deg, #c8a84b, #e8c86b)" : "linear-gradient(90deg, #cc1111, #ff4444)",
+              transition: "width 0.5s linear"
+            }} />
+          </div>
+
+          {/* CURRENT BLINDS */}
+          {!isBreak ? (
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{ fontSize: 11, letterSpacing: 4, color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>AKTUÁLNÍ BLINDY</div>
+              <div style={{ fontSize: "clamp(51px, 8.5vw, 87px)", fontWeight: "400", letterSpacing: 2, color: "#fff" }}>
+                <span style={{ color: "rgba(255,255,255,0.5)" }}>{fmt(current?.small)}</span>
+                <span style={{ color: "#cc1111", margin: "0 12px" }}>/</span>
+                <span>{fmt(current?.big)}</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              {current?.note && <div style={{ fontSize: 16, color: "#c8a84b", letterSpacing: 2 }}>{current.note}</div>}
+            </div>
+          )}
+
+          {/* NEXT LEVEL */}
+          {next && (
+            <div style={{
+              textAlign: "center", padding: "10px 28px",
+              border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4,
+              background: "rgba(255,255,255,0.03)", marginBottom: 32
+            }}>
+              <div style={{ fontSize: 10, letterSpacing: 3, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>
+                {next.type === "break" ? "PŘÍŠTÍ" : "PŘÍŠTÍ LEVEL"}
+              </div>
+              <div style={{ fontSize: "clamp(23px, 4.5vw, 43px)", color: "rgba(255,255,255,0.6)", letterSpacing: 1 }}>
+                {next.type === "break"
+                  ? `${next.label || "PAUZA"} — ${next.duration} min`
+                  : `${fmt(next.small)} / ${fmt(next.big)}`}
+              </div>
+              {next.note && <div style={{ fontSize: 10, color: "#c8a84b88", marginTop: 3 }}>{next.note}</div>}
+            </div>
+          )}
+
+          {/* Controls */}
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 32 }}>
+            <button onClick={handlePrevLevel} style={{
+              background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
+              color: "#fff", width: 48, height: 48, borderRadius: "50%", cursor: "pointer",
+              fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center"
+            }}>‹</button>
+
+            <button onClick={handlePlayPause} style={{
+              background: running ? "rgba(204,17,17,0.15)" : "#cc1111",
+              border: "2px solid " + (running ? "#cc1111" : "#cc1111"),
+              color: "#fff", width: 72, height: 72, borderRadius: "50%", cursor: "pointer",
+              fontSize: 26, display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: running ? "0 0 30px rgba(204,17,17,0.4)" : "none",
+              transition: "all 0.2s"
+            }}>
+              {running ? "⏸" : "▶"}
+            </button>
+
+            <button onClick={handleNextLevel} style={{
+              background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
+              color: "#fff", width: 48, height: 48, borderRadius: "50%", cursor: "pointer",
+              fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center"
+            }}>›</button>
+          </div>
+
+          {/* Stats bar */}
+          <div style={{
+            display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center",
+            fontSize: 15, letterSpacing: 2, color: "rgba(255,255,255,0.3)",
+            borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, width: "min(600px, 90vw)"
+          }}>
+            <span>HRÁČI: <b style={{ color: "rgba(255,255,255,0.6)" }}>{settings.players}</b></span>
+            <span>BUY-IN: <b style={{ color: "rgba(255,255,255,0.6)" }}>{fmtMoney(settings.buyIn)}</b></span>
+            <span>PRIZE POOL: <b style={{ color: "#cc1111" }}>{fmtMoney(prizePool)}</b></span>
+            <span>CHIPS: <b style={{ color: "rgba(255,255,255,0.6)" }}>{settings.startChips.toLocaleString()}</b></span>
+          </div>
+        </div>
+      )}
+
+      {/* ========== SETTINGS VIEW ========== */}
+      {view === "settings" && (
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "80px 20px 40px", position: "relative", zIndex: 2 }}>
+          <h2 style={{ letterSpacing: 6, fontSize: 18, color: "#cc1111", marginBottom: 32, textAlign: "center", textTransform: "uppercase" }}>Nastavení Turnaje</h2>
+
+          {[
+            ["Název turnaje", "name", "text"],
+            ["Počet hráčů", "players", "number"],
+            ["Start chipů", "startChips", "number"],
+            ["Buy-in (Kč)", "buyIn", "number"],
+            ["Rebuy (Kč)", "rebuy", "number"],
+            ["Add-on (Kč)", "addon", "number"],
+          ].map(([label, key, type]) => (
+            <div key={key} style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
+              <label style={{ width: 160, fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", flexShrink: 0 }}>{label}</label>
+              <input
+                type={type}
+                value={settings[key]}
+                onChange={(e) => setSettings((s) => ({ ...s, [key]: type === "number" ? Number(e.target.value) : e.target.value }))}
+                style={{
+                  flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)",
+                  color: "#fff", padding: "10px 14px", borderRadius: 4, fontSize: 14, fontFamily: "Georgia, serif"
+                }}
+              />
+            </div>
+          ))}
+
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 20, marginTop: 8 }}>
+            <h3 style={{ letterSpacing: 4, fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>ŽIVÉ POČÍTÁNÍ</h3>
+            {[["Počet rebuyů", rebuys, setRebuys], ["Počet add-onů", addons, setAddons]].map(([label, val, setter]) => (
+              <div key={label} style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
+                <label style={{ width: 160, fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", flexShrink: 0 }}>{label}</label>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <button onClick={() => setter((v) => Math.max(0, v - 1))} style={btnSmall}>-</button>
+                  <span style={{ width: 40, textAlign: "center", fontSize: 18 }}>{val}</span>
+                  <button onClick={() => setter((v) => v + 1)} style={btnSmall}>+</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            marginTop: 24, padding: 20, background: "rgba(204,17,17,0.08)",
+            border: "1px solid rgba(204,17,17,0.3)", borderRadius: 4, textAlign: "center"
+          }}>
+            <div style={{ fontSize: 11, letterSpacing: 4, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>CELKOVÝ PRIZE POOL</div>
+            <div style={{ fontSize: 40, color: "#cc1111", fontWeight: "bold" }}>{fmtMoney(prizePool)}</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+              {settings.players} × {fmtMoney(settings.buyIn)}
+              {rebuys > 0 ? ` + ${rebuys} × ${fmtMoney(settings.rebuy)} rebuy` : ""}
+              {addons > 0 ? ` + ${addons} × ${fmtMoney(settings.addon)} add-on` : ""}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== STRUCTURE VIEW ========== */}
+      {view === "structure" && (
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "80px 20px 40px", position: "relative", zIndex: 2 }}>
+          <h2 style={{ letterSpacing: 6, fontSize: 18, color: "#cc1111", marginBottom: 24, textAlign: "center", textTransform: "uppercase" }}>Struktura Turnaje</h2>
+
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
+                  {["#", "Typ", "Level", "SB", "BB", "Min", "Blok", "Poznámka", ""].map((h) => (
+                    <th key={h} style={{ padding: "8px 6px", textAlign: "left", fontSize: 10, letterSpacing: 2, color: "rgba(255,255,255,0.4)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {structure.map((row, idx) => (
+                  <tr key={row.id} style={{
+                    background: idx === currentIdx ? "rgba(204,17,17,0.15)" : row.type === "break" ? "rgba(200,168,75,0.06)" : "transparent",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)"
+                  }}>
+                    <td style={td}>{idx + 1}</td>
+                    <td style={td}>
+                      <select value={row.type} onChange={(e) => updateRow(row.id, "type", e.target.value)} style={sel}>
+                        <option value="level">Level</option>
+                        <option value="break">Pauza</option>
+                      </select>
+                    </td>
+                    <td style={td}>
+                      {row.type === "level"
+                        ? <input type="number" value={row.level} onChange={(e) => updateRow(row.id, "level", e.target.value)} style={{ ...inp, width: 44 }} />
+                        : <input type="text" value={row.label || ""} onChange={(e) => updateRow(row.id, "label", e.target.value)} style={{ ...inp, width: 80 }} placeholder="Pauza" />
+                      }
+                    </td>
+                    <td style={td}>
+                      {row.type === "level" && <input type="number" value={row.small} onChange={(e) => updateRow(row.id, "small", e.target.value)} style={{ ...inp, width: 64 }} />}
+                    </td>
+                    <td style={td}>
+                      {row.type === "level" && <input type="number" value={row.big} onChange={(e) => updateRow(row.id, "big", e.target.value)} style={{ ...inp, width: 64 }} />}
+                    </td>
+                    <td style={td}>
+                      <input type="number" value={row.duration} onChange={(e) => updateRow(row.id, "duration", e.target.value)} style={{ ...inp, width: 44 }} />
+                    </td>
+                    <td style={td}>
+                      <input type="number" value={row.block} onChange={(e) => updateRow(row.id, "block", e.target.value)} style={{ ...inp, width: 36 }} />
+                    </td>
+                    <td style={td}>
+                      <input type="text" value={row.note || ""} onChange={(e) => updateRow(row.id, "note", e.target.value)} style={{ ...inp, width: 120 }} />
+                    </td>
+                    <td style={{ ...td, whiteSpace: "nowrap" }}>
+                      <button onClick={() => moveRow(row.id, -1)} style={microBtn} title="Nahoru">↑</button>
+                      <button onClick={() => moveRow(row.id, 1)} style={microBtn} title="Dolů">↓</button>
+                      <button onClick={() => handleSelectLevel(idx)} style={{ ...microBtn, color: idx === currentIdx ? "#cc1111" : "#fff" }} title="Spustit">▶</button>
+                      <button onClick={() => removeRow(row.id)} style={{ ...microBtn, color: "#cc1111" }} title="Smazat">✕</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+            <button onClick={addLevel} style={addBtn}>+ Přidat Level</button>
+            <button onClick={addBreak} style={{ ...addBtn, background: "rgba(200,168,75,0.15)", borderColor: "rgba(200,168,75,0.4)", color: "#c8a84b" }}>+ Přidat Pauzu</button>
+            <button onClick={() => { setStructure(DEFAULT_STRUCTURE); setCurrentIdx(0); setTimeLeft(DEFAULT_STRUCTURE[0].duration * 60); setRunning(false); }}
+              style={{ ...addBtn, background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.4)", marginLeft: "auto" }}>
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const td = { padding: "7px 6px", verticalAlign: "middle" };
+const inp = { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", padding: "4px 6px", borderRadius: 3, fontSize: 13, fontFamily: "'Anton', sans-serif" };
+const sel = { ...inp, cursor: "pointer" };
+const microBtn = { background: "transparent", border: "none", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: 14, padding: "2px 4px" };
+const addBtn = { background: "rgba(204,17,17,0.15)", border: "1px solid rgba(204,17,17,0.4)", color: "#cc1111", padding: "10px 20px", borderRadius: 4, cursor: "pointer", fontSize: 12, letterSpacing: 2, fontFamily: "'Anton', sans-serif" };
+const btnSmall = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", width: 32, height: 32, borderRadius: 4, cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" };
