@@ -167,7 +167,7 @@
                 {current?.type === "break" ? (current.label || "PAUZA") : `LEVEL ${current?.level} — BLOK ${current?.block}`}
               </div>
 
-              <div style={{ fontSize: "clamp(105px, 20vw, 195px)", fontWeight: "400", lineHeight: 1, color: timerColor, letterSpacing: "0.05em", fontFamily: "'Anton', sans-serif", textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? "0 0 40px #c8a84b66" : "0 0 40px rgba(255,255,255,0.1)", transition: "color 0.3s, text-shadow 0.3s" }}>
+              <div style={{ fontSize: "min(26vw, 38vh)", lineHeight: 1, color: timerColor, letterSpacing: "0.05em", fontFamily: "'Anton', sans-serif", textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? "0 0 40px #c8a84b66" : "0 0 40px rgba(255,255,255,0.1)", transition: "color 0.3s, text-shadow 0.3s" }}>
                 {fmtTime(timeLeft)}
               </div>
 
@@ -178,7 +178,7 @@
               {!isBreak ? (
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <div style={{ fontSize: 11, letterSpacing: 4, color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>AKTUÁLNÍ BLINDY</div>
-                  <div style={{ fontSize: "clamp(51px, 8.5vw, 87px)", fontWeight: "400", letterSpacing: 2, color: "#fff" }}>
+                  <div style={{ fontSize: "clamp(51px, 8.5vw, 87px)", letterSpacing: 2, color: "#fff" }}>
                     <span style={{ color: "rgba(255,255,255,0.5)" }}>{fmt(current?.small)}</span>
                     <span style={{ color: "#cc1111", margin: "0 12px" }}>/</span>
                     <span>{fmt(current?.big)}</span>
@@ -209,10 +209,10 @@
               </div>
 
               <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center", fontSize: 15, letterSpacing: 2, color: "rgba(255,255,255,0.3)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, width: "min(600px, 90vw)" }}>
-                <span>HRÁČI: <b style={{ color: "rgba(255,255,255,0.6)" }}>{settings.players}</b></span>
-                <span>BUY-IN: <b style={{ color: "rgba(255,255,255,0.6)" }}>{fmtMoney(settings.buyIn)}</b></span>
-                <span>PRIZE POOL: <b style={{ color: "#cc1111" }}>{fmtMoney(prizePool)}</b></span>
-                <span>CHIPS: <b style={{ color: "rgba(255,255,255,0.6)" }}>{settings.startChips.toLocaleString()}</b></span>
+                <span>HRÁČI: <span style={{ color: "rgba(255,255,255,0.6)" }}>{settings.players}</span></span>
+                <span>BUY-IN: <span style={{ color: "rgba(255,255,255,0.6)" }}>{fmtMoney(settings.buyIn)}</span></span>
+                <span>PRIZE POOL: <span style={{ color: "#cc1111" }}>{fmtMoney(prizePool)}</span></span>
+                <span>CHIPS: <span style={{ color: "rgba(255,255,255,0.6)" }}>{settings.startChips.toLocaleString()}</span></span>
               </div>
             </div>
           )}
