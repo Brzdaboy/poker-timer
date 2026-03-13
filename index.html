@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Antonio&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -98,7 +99,7 @@
       sectionLabel: "rgba(255,255,255,0.4)",
       progressBg: "rgba(255,255,255,0.1)",
       blindsLabel: "rgba(255,255,255,0.35)",
-      blindsSB: "rgba(255,255,255,0.5)",
+      blindsSB: "rgba(255,255,255,1)",
       navActiveBg: "#cc1111",
       navActiveBorder: "#cc1111",
     };
@@ -146,7 +147,7 @@
       sectionLabel: "rgba(0,0,0,0.4)",
       progressBg: "rgba(0,0,0,0.12)",
       blindsLabel: "rgba(0,0,0,0.35)",
-      blindsSB: "rgba(0,0,0,0.45)",
+      blindsSB: "rgba(0,0,0,1)",
       navActiveBg: "#cc1111",
       navActiveBorder: "#cc1111",
     };
@@ -347,7 +348,7 @@ const playClassicBeep = (freq, duration) => {
                 {current?.type === "break" ? (current.label || "PAUZA") : `LEVEL ${current?.level} — BLOK ${current?.block}`}
               </div>
 
-              <div style={{ fontSize: "min(20vw, 27vh)", lineHeight: 1, color: timerColor, letterSpacing: "0.05em", fontFamily: "'Anton', sans-serif", textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? `0 0 40px ${T.goldMuted}` : darkMode ? "0 0 40px rgba(255,255,255,0.1)" : "0 0 20px rgba(0,0,0,0.08)", transition: "color 0.3s, text-shadow 0.3s" }}>
+              <div style={{ fontSize: "min(20vw, 27vh)", lineHeight: 1, color: timerColor, letterSpacing: "0.05em", fontFamily: "'Antonio', sans-serif", textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? `0 0 40px ${T.goldMuted}` : darkMode ? "0 0 40px rgba(255,255,255,0.1)" : "0 0 20px rgba(0,0,0,0.08)", transition: "color 0.3s, text-shadow 0.3s" }}>
                 {fmtTime(timeLeft)}
               </div>
 
