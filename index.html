@@ -53,7 +53,7 @@
     const fmtTime = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`.replace(/0/g, "O");
     const fmtMoney = (n) => n ? (n.toLocaleString("cs-CZ") + " Kč").replace(/0/g, "O") : "—";
     const fmtNum = (n) => String(n).replace(/0/g, "O");
-    const PAYOUTS = [["1.", 0.50], ["2.", 0.25], ["3.", 0.13], ["4.", 0.07], ["5.", 0.05]];
+    const DEFAULT_PAYOUTS = [[0.50], [0.25], [0.13], [0.07], [0.05]];
 
     const td = { padding: "7px 6px", verticalAlign: "middle" };
 
@@ -208,6 +208,7 @@ const playClassicBeep = (freq, duration) => {
       const [settings, setSettings] = useState(() => load("bo_settings", {
         players: 20, startChips: 20000, buyIn: 500, rebuy: 500, addon: 500,
         name: "Boršická Odrbávačka III.",
+        payouts: [0.50, 0.25, 0.13, 0.07, 0.05],
       }));
       const [rebuys, setRebuys] = useState(() => load("bo_rebuys", 0));
       const [addons, setAddons] = useState(() => load("bo_addons", 0));
@@ -314,7 +315,7 @@ const playClassicBeep = (freq, duration) => {
         setRebuys(0);
         setAddons(0);
         setPlayersLeft(20);
-        setSettings({ players: 20, startChips: 20000, buyIn: 500, rebuy: 500, addon: 500, name: "Boršická Odrbávačka III." });
+        setSettings({ players: 20, startChips: 20000, buyIn: 500, rebuy: 500, addon: 500, name: "Boršická Odrbávačka III.", payouts: [0.50, 0.25, 0.13, 0.07, 0.05] });
       };
 
       const isBreak = current?.type === "break";
@@ -375,7 +376,7 @@ const playClassicBeep = (freq, duration) => {
               {/* Boxes row */}
               <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", justifyContent: "center" }}>
                 {next && (
-                  <div style={{ textAlign: "center", padding: "8px 20px", border: `1px solid ${T.borderCard}`, borderRadius: 4, background: T.bgCard }}>
+                  <div style={{ textAlign: "center", padding: "8px 36px", border: `1px solid ${T.borderCard}`, borderRadius: 4, background: T.bgCard }}>
                     <div style={{ fontSize: 14, letterSpacing: 3, color: T.textMuted, marginBottom: 4 }}>{next.type === "break" ? "PŘÍŠTÍ" : "PŘÍŠTÍ LEVEL"}</div>
                     <div style={{ fontSize: "min(5vw, 7vh)", color: T.textSub, letterSpacing: 1, fontWeight: 700 }}>
                       {next.type === "break" ? `${next.label || "PAUZA"} — ${next.duration} min` : `${fmt(next.small)}/${fmt(next.big)}`}
@@ -383,21 +384,16 @@ const playClassicBeep = (freq, duration) => {
                     {next.note && <div style={{ fontSize: 9, color: T.goldMuted, marginTop: 2 }}>{next.note}</div>}
                   </div>
                 )}
-                <div style={{ textAlign: "center", padding: "8px 20px", border: `1px solid ${T.borderCard}`, borderRadius: 4, background: T.bgCard }}>
+                <div style={{ textAlign: "center", padding: "8px 36px", border: `1px solid ${T.borderCard}`, borderRadius: 4, background: T.bgCard }}>
                   <div style={{ fontSize: 14, letterSpacing: 3, color: T.textMuted, marginBottom: 4 }}>AVG CHIPS</div>
                   <div style={{ fontSize: "min(5vw, 7vh)", color: T.textSub, letterSpacing: 1, fontWeight: 700 }}>{fmt(avgChips)}</div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 5 }}>
-                    <button onClick={() => setPlayersLeft(v => Math.max(1, v - 1))} style={{ background: T.bgSmallBtn, border: `1px solid ${T.bgSmallBtnBorder}`, color: T.text, width: 22, height: 22, borderRadius: 3, cursor: "pointer", fontSize: 13, lineHeight: 1 }}>-</button>
-                    <span style={{ fontSize: 10, letterSpacing: 2, color: T.textDim }}>{fmtNum(playersLeft)} hráčů</span>
-                    <button onClick={() => setPlayersLeft(v => v + 1)} style={{ background: T.bgSmallBtn, border: `1px solid ${T.bgSmallBtnBorder}`, color: T.text, width: 22, height: 22, borderRadius: 3, cursor: "pointer", fontSize: 13, lineHeight: 1 }}>+</button>
-                  </div>
                 </div>
-                <div style={{ padding: "8px 20px", border: `1px solid ${T.borderCard}`, borderRadius: 4, background: T.bgCard }}>
+                <div style={{ padding: "8px 36px", border: `1px solid ${T.borderCard}`, borderRadius: 4, background: T.bgCard }}>
                   <div style={{ fontSize: 14, letterSpacing: 3, color: T.textMuted, marginBottom: 6, textAlign: "center" }}>VÝHRY</div>
-                  {PAYOUTS.map(([place, pct]) => (
-                    <div key={place} style={{ display: "flex", justifyContent: "space-between", gap: 20, marginBottom: 5, alignItems: "center" }}>
-                      <span style={{ fontSize: 14, color: place === "1." ? T.gold : T.textMid, letterSpacing: 1 }}>{place}</span>
-                      <span style={{ fontSize: 16, color: place === "1." ? T.gold : T.textSub, letterSpacing: 1, fontWeight: 700 }}>{Math.round(prizePool * pct).toLocaleString("cs-CZ")} Kč</span>
+                  {(settings.payouts || DEFAULT_PAYOUTS).map((pct, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 20, marginBottom: 5, alignItems: "center" }}>
+                      <span style={{ fontSize: 14, color: i === 0 ? T.gold : T.textMid, letterSpacing: 1 }}>{i + 1}.</span>
+                      <span style={{ fontSize: 16, color: i === 0 ? T.gold : T.textSub, letterSpacing: 1, fontWeight: 700 }}>{Math.round(prizePool * pct).toLocaleString("cs-CZ").replace(/0/g, "O")} Kč</span>
                       <span style={{ fontSize: 11, color: T.textMuted }}>{Math.round(pct * 100)}%</span>
                     </div>
                   ))}
@@ -432,6 +428,35 @@ const playClassicBeep = (freq, duration) => {
                     style={{ flex: 1, background: T.settingsInputBg, border: `1px solid ${T.settingsInputBorder}`, color: T.text, padding: "10px 14px", borderRadius: 4, fontSize: 14, fontFamily: "'JetBrains Mono', monospace" }} />
                 </div>
               ))}
+              <div style={{ borderTop: `1px solid ${T.settingsBorder}`, paddingTop: 20, marginTop: 8 }}>
+                <h3 style={{ letterSpacing: 4, fontSize: 12, color: T.sectionLabel, marginBottom: 16 }}>VÝHRY — ROZDĚLENÍ (%)</h3>
+                {(settings.payouts || DEFAULT_PAYOUTS).map((pct, i) => {
+                  const payouts = settings.payouts || DEFAULT_PAYOUTS;
+                  const total = Math.round(payouts.reduce((a, b) => a + b, 0) * 100);
+                  const currentPct = Math.round(pct * 100);
+                  const canIncrease = total < 100;
+                  const canDecrease = currentPct > 0;
+                  const setPayout = (delta) => {
+                    const newPayouts = [...payouts];
+                    newPayouts[i] = Math.max(0, currentPct + delta) / 100;
+                    setSettings(s => ({ ...s, payouts: newPayouts }));
+                  };
+                  return (
+                    <div key={i} style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 16 }}>
+                      <label style={{ width: 160, fontSize: 11, letterSpacing: 2, color: T.settingsLabel, textTransform: "uppercase", flexShrink: 0 }}>{i + 1}. místo</label>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <button onClick={() => canDecrease && setPayout(-1)} style={{ ...btnSmall, opacity: canDecrease ? 1 : 0.3 }}>-</button>
+                        <span style={{ width: 44, textAlign: "center", fontSize: 18, color: T.text }}>{currentPct}%</span>
+                        <button onClick={() => canIncrease && setPayout(+1)} style={{ ...btnSmall, opacity: canIncrease ? 1 : 0.3 }}>+</button>
+                      </div>
+                      <span style={{ fontSize: 13, color: T.textMuted }}>= {fmtMoney(Math.round(prizePool * pct))}</span>
+                    </div>
+                  );
+                })}
+                <div style={{ fontSize: 11, color: T.textMuted, marginTop: 4, letterSpacing: 1 }}>
+                  Celkem: {Math.round((settings.payouts || DEFAULT_PAYOUTS).reduce((a, b) => a + b, 0) * 100)}%
+                </div>
+              </div>
               <div style={{ borderTop: `1px solid ${T.settingsBorder}`, paddingTop: 20, marginTop: 8 }}>
                 <h3 style={{ letterSpacing: 4, fontSize: 12, color: T.sectionLabel, marginBottom: 16 }}>ŽIVÉ POČÍTÁNÍ</h3>
                 {[["Počet rebuyů", rebuys, setRebuys],["Počet add-onů", addons, setAddons],["Hráči ve hře", playersLeft, setPlayersLeft]].map(([label, val, setter]) => (
