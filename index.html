@@ -400,7 +400,7 @@ const playClassicBeep = (freq, duration) => {
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
                 <button onClick={handlePrev} style={{ background: T.bgBtn, border: `1px solid ${T.border}`, color: T.text, width: 44, height: 44, borderRadius: "50%", cursor: "pointer", fontSize: 18 }}>‹</button>
                 <button onClick={handlePlayPause} style={{ background: running ? "rgba(204,17,17,0.15)" : "#cc1111", border: "2px solid #cc1111", color: "#fff", width: 44, height: 44, borderRadius: "50%", cursor: "pointer", fontSize: 24, boxShadow: running ? "0 0 30px rgba(204,17,17,0.4)" : "none", transition: "all 0.2s" }}>
                   {running ? "⏸" : "▶"}
@@ -408,7 +408,7 @@ const playClassicBeep = (freq, duration) => {
                 <button onClick={handleNext} style={{ background: T.bgBtn, border: `1px solid ${T.border}`, color: T.text, width: 44, height: 44, borderRadius: "50%", cursor: "pointer", fontSize: 18 }}>›</button>
               </div>
 
-              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", fontSize: 18, letterSpacing: 2, color: T.textMuted, borderTop: `1px solid ${T.borderDim}`, paddingTop: 10, width: "min(700px, 92vw)", fontWeight: 700 }}>
+              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", fontSize: 18, letterSpacing: 2, color: T.textMuted, borderTop: `1px solid ${T.borderDim}`, paddingTop: 16, width: "min(1080px, 92vw)", fontWeight: 700 }}>
                 <span>HRÁČI: <span style={{ color: T.textSub }}>{fmtNum(settings.players)}</span></span>
                 <span>BUY-IN: <span style={{ color: T.textSub }}>{fmtMoney(settings.buyIn)}</span></span>
                 <span>PRIZE POOL: <span style={{ color: "#cc1111" }}>{fmtMoney(prizePool)}</span></span>
