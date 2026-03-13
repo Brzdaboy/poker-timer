@@ -349,7 +349,7 @@ const playClassicBeep = (freq, duration) => {
                 {current?.type === "break" ? (current.label || "PAUZA") : `LEVEL ${current?.level} — BLOK ${current?.block}`}
               </div>
 
-              <div style={{ fontSize: "min(20vw, 27vh)", lineHeight: 1, color: timerColor, letterSpacing: "0.05em", fontFamily: "'IBM Plex Mono', sans-serif", textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? `0 0 40px ${T.goldMuted}` : darkMode ? "0 0 40px rgba(255,255,255,0.1)" : "0 0 20px rgba(0,0,0,0.08)", transition: "color 0.3s, text-shadow 0.3s" }}>
+              <div style={{ fontSize: "min(20vw, 27vh)", lineHeight: 1, color: timerColor, letterSpacing: "0.05em", fontFamily: "'Anton', sans-serif", textShadow: flash ? "0 0 60px #ff0000, 0 0 120px #ff000066" : isBreak ? `0 0 40px ${T.goldMuted}` : darkMode ? "0 0 40px rgba(255,255,255,0.1)" : "0 0 20px rgba(0,0,0,0.08)", transition: "color 0.3s, text-shadow 0.3s" }}>
                 {fmtTime(timeLeft)}
               </div>
 
